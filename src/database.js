@@ -21,4 +21,26 @@ db.connect((err) => {
   console.log("✅ Connected to MySQL");
 });
 
+// After successful connection, ensure the data table exists
+// Table uses snake_case column names (industry best practice)
+// All fields are NOT NULL to enforce data integrity
+db.query(
+  `
+  CREATE TABLE IF NOT EXISTS mysql_table (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(20) NOT NULL,
+    last_name VARCHAR(20) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    age INT NOT NULL
+  )
+`,
+  (err) => {
+    if (err) {
+      console.error("Table creation error:", err);
+    } else {
+      console.log("✅ Table mysql_table ready");
+    }
+  }
+);
+
 module.exports = db;
