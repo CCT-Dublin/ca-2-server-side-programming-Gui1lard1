@@ -1,0 +1,66 @@
+<!-- public/form.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secure Information Submission</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Secure Information Submission</h1>
+      <form id="f">
+        <label for="first_name">First Name</label>
+        <input
+          id="first_name"
+          name="first_name"
+          type="text"
+          placeholder="Letters/numbers only, max 20 characters"
+          required
+        />
+
+        <label for="last_name">Last Name</label>
+        <input
+          id="last_name"
+          name="last_name"
+          type="text"
+          placeholder="Letters/numbers only, max 20 characters"
+          required
+        />
+
+        <label for="email">Email Address</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          placeholder="your.email@example.com"
+          required
+        />
+
+        <label for="phone">Phone Number</label>
+        <input
+          id="phone"
+          name="phone"
+          type="tel"
+          placeholder="10 digits (e.g., 1234567890)"
+          required
+        />
+
+        <label for="eircode">Eircode</label>
+        <input
+          id="eircode"
+          name="eircode"
+          type="text"
+          placeholder="6 characters, starts with a number (e.g., D6W2YX)"
+          required
+        />
+
+        <button type="submit">Submit Securely</button>
+      </form>
+
+      <div id="message" class="message"></div>
+    </div>
+    <script src="script.js" />
+  </body>
+</html>
