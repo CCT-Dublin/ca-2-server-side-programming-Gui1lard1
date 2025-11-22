@@ -7,7 +7,7 @@ const mysql = require("mysql2");
 const db = mysql.createConnection({
   host: "localhost",
   user: "root", // ← change if needed
-  password: "", // ← change if needed
+  password: "Gr1ll0USASk13#IRL", // ← change if needed
   database: "company_db", // ← create this DB in MySQL first
 });
 
