@@ -32,3 +32,52 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve static files (e.g., HTML, CSS, JS) from the 'public' folder
 app.use(express.static(path.join(__dirname, "public")));
+
+// Validate each CSV row to ensure data integrity and prevent injection
+// Returns true only if all fields meet format and length requirements
+function validateRow(row) {
+  const { first_name, last_name, email, age } = row;
+  const a = Number(age);
+  return (
+    first_name &&
+    last_name &&
+    email &&
+    age &&
+    /^[a-zA-Z0-9]{1,20}$/.test(first_name) && // Alphanumeric, max 20 chars
+    /^[a-zA-Z0-9]{1,20}$/.test(last_name) && // Same for last name
+    /^\S+@\S+\.\S+$/.test(email) && // Basic email format
+    !isNaN(a) &&
+    a >= 0 &&
+    a <= 150 // Reasonable age range
+  );
+}
+
+// Load and process the CSV file once when the server starts
+// Insert only validated records into the database
+function loadCSV() {
+  const valid = []; // Store valid rows for batch insert
+  let line = 2; // Track CSV line number (header = line 1)
+
+  fs.createReadStream("person_info (1).csv")
+    .pipe(csv()) // Parse CSV stream
+    .on("data", (row) => {
+      if (validateRow(row)) {
+        // Push safe data as array for efficient INSERT ... VALUES ?
+        valid.push([row.first_name, row.last_name, row.email, row.age]);
+      } else {
+        console.error(`❌ Invalid data at row ${line}:`, row);
+      }
+      line++;
+    })
+    .on("end", () => {
+      if (valid.length > 0) {
+        // Use mysql2's safe batch insert (prevents SQL injection)
+        const sql =
+          "INSERT INTO mysql_table (first_name, last_name, email, age) VALUES ?";
+        db.query(sql, [valid], (err) => {
+          if (err) console.error("Insert failed:", err);
+          else console.log(`✅ ${valid.length} records inserted.`);
+        });
+      }
+    });
+}
