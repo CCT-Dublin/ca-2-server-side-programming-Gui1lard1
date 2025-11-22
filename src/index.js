@@ -81,3 +81,42 @@ function loadCSV() {
       }
     });
 }
+
+// Handle POST requests from frontend form
+// Validates all fields before accepting submission
+app.post("/submit", (req, res) => {
+  const { first_name, last_name, email, phone, eircode } = req.body;
+
+  // Apply strict validation rules (aligned with Irish/UK standards)
+  if (!/^[a-zA-Z0-9]{1,20}$/.test(first_name))
+    return res.status(400).send("Invalid first name");
+  if (!/^[a-zA-Z0-9]{1,20}$/.test(last_name))
+    return res.status(400).send("Invalid last name");
+  if (!/^\S+@\S+\.\S+$/.test(email))
+    return res.status(400).send("Invalid email");
+  if (!/^\d{10}$/.test(phone))
+    return res.status(400).send("Phone must be 10 digits");
+  if (!/^[0-9][a-zA-Z0-9]{5}$/.test(eircode))
+    return res.status(400).send("Invalid Eircode"); // Irish postal code format
+
+  // In a production system, this data would be inserted into a secure table
+  // For now, log to console to confirm validation works
+  console.log("✅ Valid form data:", {
+    first_name,
+    last_name,
+    email,
+    phone,
+    eircode,
+  });
+  res.send("✅ Form submitted securely!");
+});
+
+// Start the server and trigger CSV loading once ready
+app.listen(PORT, (err) => {
+  if (err) {
+    console.error("❌ Server failed:", err);
+    process.exit(1);
+  }
+  console.log(`✅ Server running on http://localhost:${PORT}`);
+  loadCSV(); // Load initial data from CSV
+});
