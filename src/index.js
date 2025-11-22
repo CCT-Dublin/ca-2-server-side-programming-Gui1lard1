@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 // import essentials modules
 const express = require("express");
 const path = require("path");
@@ -8,7 +10,7 @@ const helmet = require("helmet"); // security HTTP headers
 
 // initialize express app and define port
 const app = express();
-const port = express.env.PORT || 3000;
+const port = 3000 || 4000;
 
 // Apply Helmet middleware to enhance security
 // - Sets Content Security Policy (CSP)
@@ -58,7 +60,7 @@ function loadCSV() {
   const valid = []; // Store valid rows for batch insert
   let line = 2; // Track CSV line number (header = line 1)
 
-  fs.createReadStream("person_info (1).csv")
+  fs.createReadStream("person_info.csv")
     .pipe(csv()) // Parse CSV stream
     .on("data", (row) => {
       if (validateRow(row)) {
@@ -112,11 +114,11 @@ app.post("/submit", (req, res) => {
 });
 
 // Start the server and trigger CSV loading once ready
-app.listen(PORT, (err) => {
+app.listen(3000, (err) => {
   if (err) {
     console.error("❌ Server failed:", err);
     process.exit(1);
   }
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`✅ Server running on http://localhost:${3000}`);
   loadCSV(); // Load initial data from CSV
 });
