@@ -21,12 +21,13 @@ db.connect((err) => {
   console.log("Connected to MySQL");
 });
 
-// After successful connection, ensure the data table exists
+// After successful connection, ensure the data tables exists
 // Table uses snake_case column names (industry best practice)
 // All fields are NOT NULL to enforce data integrity
+// Ensures that both tables exist
 db.query(
   `
-  CREATE TABLE IF NOT EXISTS mysql_table (
+  CREATE TABLE IF NOT EXISTS csv_imported_users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(20) NOT NULL,
     last_name VARCHAR(20) NOT NULL,
@@ -38,7 +39,7 @@ db.query(
     if (err) {
       console.error("Table creation error:", err);
     } else {
-      console.log("Table mysql_table ready");
+      console.log("Table 'mysql_table' ready");
     }
   }
 );
