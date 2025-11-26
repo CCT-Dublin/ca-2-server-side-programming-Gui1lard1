@@ -1,5 +1,6 @@
 document.getElementById("f").addEventListener("submit", async (e) => {
   e.preventDefault();
+  e.returnValue = "";
   const form = e.target;
   const messageEl = document.getElementById("message");
 
@@ -15,7 +16,7 @@ document.getElementById("f").addEventListener("submit", async (e) => {
 
     const text = await res.text();
     if (res.ok) {
-      messageEl.textContent = text; // e.g., "✅ Form submitted securely!"
+      messageEl.textContent = text; // e.g., "Form submitted securely!"
       messageEl.classList.add("success");
       form.reset(); // Clear form on success
     } else {

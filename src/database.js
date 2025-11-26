@@ -15,10 +15,10 @@ const db = mysql.createConnection({
 // Exit the process if connection fails (critical for security and reliability)
 db.connect((err) => {
   if (err) {
-    console.error("❌ DB connection failed:", err.message);
+    console.error("DB connection failed:", err.message);
     process.exit(1); // Stop the app if DB is unreachable
   }
-  console.log("✅ Connected to MySQL");
+  console.log("Connected to MySQL");
 });
 
 // After successful connection, ensure the data table exists
@@ -38,7 +38,7 @@ db.query(
     if (err) {
       console.error("Table creation error:", err);
     } else {
-      console.log("✅ Table mysql_table ready");
+      console.log("Table mysql_table ready");
     }
   }
 );

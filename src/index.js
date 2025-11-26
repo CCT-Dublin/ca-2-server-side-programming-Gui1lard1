@@ -20,10 +20,19 @@ app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
-        defaultSrc: ["'self'"], // Only allow resources from same origin
-        styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles (for quick UI)
-        scriptSrc: ["'self'"], // Only allow trusted scripts
-      },
+        defaultSrc: ["'self'"],
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'", // needed for simple inline styles if used
+          "https://fonts.googleapis.com", // ← allow Google Fonts
+        ],
+        fontSrc: [
+          "'self'",
+          "https://fonts.gstatic.com", // ← allow font files from Google
+        ],
+        imgSrc: ["'self'", "data:"], // allow data URIs for images
+        scriptSrc: ["'self'"],
+      }, // Only allow trusted scripts
     },
   })
 );
@@ -67,7 +76,7 @@ function loadCSV() {
         // Push safe data as array for efficient INSERT ... VALUES ?
         valid.push([row.first_name, row.last_name, row.email, row.age]);
       } else {
-        console.error(`❌ Invalid data at row ${line}:`, row);
+        console.error(`Invalid data at row ${line}:`, row);
       }
       line++;
     })
@@ -78,7 +87,7 @@ function loadCSV() {
           "INSERT INTO mysql_table (first_name, last_name, email, age) VALUES ?";
         db.query(sql, [valid], (err) => {
           if (err) console.error("Insert failed:", err);
-          else console.log(`✅ ${valid.length} records inserted.`);
+          else console.log(`${valid.length} records inserted.`);
         });
       }
     });
@@ -103,22 +112,22 @@ app.post("/submit", (req, res) => {
 
   // In a production system, this data would be inserted into a secure table
   // For now, log to console to confirm validation works
-  console.log("✅ Valid form data:", {
+  console.log("Valid form data:", {
     first_name,
     last_name,
     email,
     phone,
     eircode,
   });
-  res.send("✅ Form submitted securely!");
+  res.send("Form submitted securely!");
 });
 
 // Start the server and trigger CSV loading once ready
 app.listen(3000, (err) => {
   if (err) {
-    console.error("❌ Server failed:", err);
+    console.error("Server failed:", err);
     process.exit(1);
   }
-  console.log(`✅ Server running on http://localhost:${3000}`);
+  console.log(`Server running on http://localhost:${3000}`);
   loadCSV(); // Load initial data from CSV
 });
