@@ -66,14 +66,13 @@ function validateRow(row) {
 // Load and process the CSV file once when the server starts
 // Insert only validated records into the database
 function loadCSV() {
-  const valid = []; // Store valid rows for batch insert
-  let line = 2; // Track CSV line number (header = line 1)
+  const valid = [];
+  let line = 2;
 
   fs.createReadStream("person_info.csv")
-    .pipe(csv()) // Parse CSV stream
+    .pipe(csv())
     .on("data", (row) => {
       if (validateRow(row)) {
-        // Push safe data as array for efficient INSERT ... VALUES ?
         valid.push([row.first_name, row.last_name, row.email, row.age]);
       } else {
         console.error(`Invalid data at row ${line}:`, row);
@@ -82,12 +81,16 @@ function loadCSV() {
     })
     .on("end", () => {
       if (valid.length > 0) {
-        // Use mysql2's safe batch insert (prevents SQL injection)
         const sql =
-          "INSERT INTO mysql_table (first_name, last_name, email, age) VALUES ?";
+          "INSERT INTO csv_imported_users (first_name, last_name, email, age) VALUES ?";
         db.query(sql, [valid], (err) => {
-          if (err) console.error("Insert failed:", err);
-          else console.log(`${valid.length} records inserted.`);
+          if (err) {
+            console.error("CSV insert failed:", err);
+          } else {
+            console.log(
+              `${valid.length} records inserted into 'csv_imported_users'.`
+            );
+          }
         });
       }
     });
@@ -98,28 +101,37 @@ function loadCSV() {
 app.post("/submit", (req, res) => {
   const { first_name, last_name, email, phone, eircode } = req.body;
 
-  // Apply strict validation rules (aligned with Irish/UK standards)
-  if (!/^[a-zA-Z0-9]{1,20}$/.test(first_name))
+  // Validation
+  if (!/^[a-zA-Z0-9 ]{1,20}$/.test(first_name))
     return res.status(400).send("Invalid first name");
-  if (!/^[a-zA-Z0-9]{1,20}$/.test(last_name))
+  if (!/^[a-zA-Z0-9 ]{1,20}$/.test(last_name))
     return res.status(400).send("Invalid last name");
   if (!/^\S+@\S+\.\S+$/.test(email))
     return res.status(400).send("Invalid email");
   if (!/^\d{10}$/.test(phone))
     return res.status(400).send("Phone must be 10 digits");
   if (!/^[0-9][a-zA-Z0-9]{5}$/.test(eircode))
-    return res.status(400).send("Invalid Eircode"); // Irish postal code format
+    return res.status(400).send("Invalid Eircode");
 
-  // In a production system, this data would be inserted into a secure table
-  // For now, log to console to confirm validation works
-  console.log("Valid form data:", {
-    first_name,
-    last_name,
-    email,
-    phone,
-    eircode,
-  });
-  res.send("Form submitted securely!");
+  // Insert to the database — right table
+  const sql = `
+    INSERT INTO mysql_table (first_name, last_name, email, phone, eircode)
+    VALUES (?, ?, ?, ?, ?)
+  `;
+
+  db.query(
+    sql,
+    [first_name, last_name, email, phone, eircode],
+    (err, result) => {
+      if (err) {
+        console.error("Database insert error:", err);
+        return res.status(500).send("Submission failed due to a server error.");
+      }
+
+      console.log("New form submission saved with ID:", result.insertId);
+      res.send("Form submitted securely!");
+    }
+  );
 });
 
 // Start the server and trigger CSV loading once ready
